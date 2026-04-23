@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS requests_history (
+    id SERIAL PRIMARY KEY,
+    input_text TEXT,
+    spam BOOL NOT NULL,
+    model_name VARCHAR(10),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+)

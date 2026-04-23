@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  spamdetector:
+    build: ./spamdetector
+    restart: always
+    container_name: spam_detector
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: python main.py
