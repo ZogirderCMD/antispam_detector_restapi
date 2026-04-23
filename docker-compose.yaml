@@ -17,3 +17,5 @@ services:
     depends_on:
       - db
     command: python main.py
+    ports:
+      - "8000:8000"
