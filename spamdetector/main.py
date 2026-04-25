@@ -3,14 +3,23 @@ from flask import Flask, make_response, request
 import psycopg2, os, datetime, re, torch, sys
 
 
+os.mkdir("logs")
+
 def log(text):
+    dt = datetime.datetime.now()
+    year = dt.year
+    month = dt.month
+    day = dt.day
+    hour = dt.hour
+    minute = dt.minute
+    second = dt.second
     try:
-        was_txt = open("logs.txt", "r").read()
+        was_txt = open(f"logs/{year}-{month}-{day}.txt", "r").read()
     except OSError:
-        open("logs.txt", "w").write("")
-        was_txt = open("logs.txt", "r").read()
-    txt = f"[{datetime.datetime.now()}]: {text}"
-    open("logs.txt", "w").write(f"{was_txt}{txt}\n")
+        open(f"logs/{year}-{month}-{day}.txt", "w").write("")
+        was_txt = open(f"logs/{year}-{month}-{day}.txt", "r").read()
+    txt = f"[{hour}:{minute}:{second}] {text}"
+    open(f"logs/{year}-{month}-{day}.txt", "w").write(f"{was_txt}{txt}\n")
     print(txt)
 
 log("Starting service...")
@@ -140,5 +149,7 @@ def historys(ids):
 @app.route("/health", methods=["GET"])
 def health():
     return make_response({"status": "ok"}, 200)
+
+log("Service started!")
 
 app.route(port=8000)
