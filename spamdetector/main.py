@@ -1,26 +1,36 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from flask import Flask, make_response, request
+from flask import Flask, make_response, request, abort
 import psycopg2, os, datetime, re, torch, sys
 
+try: os.mkdir("logs")
+except FileExistsError: pass
 
-os.mkdir("logs")
+adm_token = os.getenv("ADMIN_TOKEN")
 
 def log(text):
     dt = datetime.datetime.now()
-    year = dt.year
-    month = dt.month
-    day = dt.day
-    hour = dt.hour
-    minute = dt.minute
-    second = dt.second
+    date = dt.date()
+    tim = str(dt.time()).split(".")[0]
     try:
-        was_txt = open(f"logs/{year}-{month}-{day}.txt", "r").read()
+        was_txt = open(f"logs/{date}.txt", "r").read()
     except OSError:
-        open(f"logs/{year}-{month}-{day}.txt", "w").write("")
-        was_txt = open(f"logs/{year}-{month}-{day}.txt", "r").read()
-    txt = f"[{hour}:{minute}:{second}] {text}"
-    open(f"logs/{year}-{month}-{day}.txt", "w").write(f"{was_txt}{txt}\n")
+        open(f"logs/{date}.txt", "w").write("")
+        was_txt = open(f"logs/{date}.txt", "r").read()
+    txt = f"[{tim}] {text}"
+    open(f"logs/{date}.txt", "w").write(f"{was_txt}{txt}\n")
     print(txt)
+
+def get_logs():
+    return make_response({"result": [i.split(".")[0] for i in os.listdir("logs")]}, 200)
+
+def get_logg(date):
+    j = {}
+    try:
+        for i in open(f"logs/{date}.txt", "r").read().split("\n"):
+            s = i.split(" ")
+            if len(s) > 0: j[s[0]] = " ".join(s[1:])
+        return make_response({"result": j}, 200)
+    except FileNotFoundError: return make_response({"result": "Bro watafa r u talking abt???"}, 404)
 
 log("Starting service...")
 
@@ -73,9 +83,9 @@ class HistoryRequest:
                 self.spam = sd.is_spam
                 self.model_name = sd.model_name
                 self.pred = sd.pred
-                query(f"INSERT INTO (input_text, spam, model_name, pred) requests_history VALUES ({self.text, self.spam, self.model_name, self.pred})")
+                query(f"INSERT INTO requests_history (input_text, spam, model_name, pred) VALUES ('{self.text}', {self.spam}, '{self.model_name}', {self.pred})")
                 log(f"User made request with text: \" {text} \", result: {"POSITIVE" if self.spam else "NEGATIVE"}, prdiction score: {self.pred}")
-                return make_response({"result": "POSITIVE" if self.spam else "NEGATIVE", "score": self.pred}, 200)
+                return make_response({"result": "POSITIVE" if self.spam else "NEGATIVE", "score": str(self.pred)}, 200)
             except Exception as e:
                 log(f"Error on model: {e}")
         else:
@@ -95,12 +105,12 @@ def getHistory(typ=1, ids=None):
             log(f"User made request with empty ID!")
             return make_response({"result": "Request ID is empty!"}, 403)
         else:
+            log(f"User get request with ID: {ids}")
             query(f"SELECT input_text, spam, pred FROM requests_history WHERE id={ids}")
             try:
-                res = cur.fetchall()
-                log(f"User get request with ID: {ids}")
-                return make_response({"input_text":res[0], "result": "POSITIVE" if res[1] else "NEGATIVE", "score": res[2]}, 200)
-            except:
+                res = cur.fetchall()[0]
+                return make_response({"input_text":res[0], "result": "POSITIVE" if res[1] else "NEGATIVE", "score": str(res[2])}, 200)
+            except Exception as e:
                 log(f"User made request with unknown ID: {ids}")
                 return make_response({"result": "Unknown request ID!"}, 403)
 
@@ -144,12 +154,22 @@ def history():
 
 @app.route("/history/<int:ids>", methods=["GET"])
 def historys(ids):
-    return getHistory(2, ids)
+    return getHistory(2, int(ids))
 
 @app.route("/health", methods=["GET"])
 def health():
     return make_response({"status": "ok"}, 200)
 
+@app.route("/<adt>/all_logs", methods=["GET"])
+def all_logs(adt):
+    if adt != adm_token: abort(404)
+    else: return get_logs()
+
+@app.route("/<adt>/get_log/<date>", methods=["GET"])
+def get_log(adt, date):
+    if adt != adm_token: abort(404)
+    else: return get_logg(date)
+
 log("Service started!")
 
-app.route(port=8000)
+app.run(port=8000)
