@@ -30,7 +30,7 @@ def get_logg(date):
             s = i.split(" ")
             if len(s) > 0: j[s[0]] = " ".join(s[1:])
         return make_response({"result": j}, 200)
-    except FileNotFoundError: return make_response({"result": "Bro watafa r u talking abt???"}, 404)
+    except FileNotFoundError: return make_response({"result": "Log file with this date wasn't found!"}, 404)
 
 log("Starting service...")
 
