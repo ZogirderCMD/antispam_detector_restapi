@@ -172,4 +172,4 @@ def get_log(adt, date):
 
 log("Service started!")
 
-app.run(port=8000)
+app.run(host="0.0.0.0", port=8000)
