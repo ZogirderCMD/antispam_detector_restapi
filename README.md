@@ -109,3 +109,9 @@
   }
 }
 ```
+Если дата логов не существует, вернёт код 404
+```json
+{
+  "result": "Log file with this date wasn't found!"
+}
+```
