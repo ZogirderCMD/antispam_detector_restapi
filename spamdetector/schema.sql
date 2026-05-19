@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS requests_history (
     input_text TEXT,
     spam BOOL NOT NULL,
     pred FLOAT NOT NULL,
-    model_name VARCHAR(20),
+    model_name VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 )

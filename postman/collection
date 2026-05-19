@@ -1,0 +1,259 @@
+{
+  "info": {
+    "_postman_id": "396f4afe-1311-4407-878e-74e299687f8a",
+    "name": "Сервис для распознавания спама",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54261312",
+    "_collection_link": "https://go.postman.co/collection/54261312-396f4afe-1311-4407-878e-74e299687f8a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Анализ",
+      "item": [
+        {
+          "name": "Запрос с текстом",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "text",
+                  "value": "Здравствуйте! Вы выиграли 100.000 рублей! Чтобы забрать приз зайдите по ссылке http://www.nevranyo.ru/sijjisae23",
+                  "type": "text",
+                  "uuid": "dcf2a0cc-4901-45ed-97af-275b1d774f50"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/analyze",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "analyze"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос с текстом 2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "text",
+                  "value": "Саня, верни сотку",
+                  "type": "text",
+                  "uuid": "dcf2a0cc-4901-45ed-97af-275b1d774f50"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/analyze",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "analyze"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос с пустым текстом",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/analyze",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "analyze"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Просмотр анализа по ID",
+      "item": [
+        {
+          "name": "Запрос с известным ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "http://localhost:8000/history/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "history",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос с неизвестным ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "http://localhost:8000/history/0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "history",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Логи",
+      "item": [
+        {
+          "name": "Получить даты всех логов",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/admin_token/all_logs",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "admin_token",
+                "all_logs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить логи определённого дня",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/admin_token/get_log/2026-05-02",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "admin_token",
+                "get_log",
+                "2026-05-02"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Проверка состояния сервера",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "text",
+              "value": "Здравствуйте! Вы выиграли 100.000 рублей! Чтобы забрать приз зайдите по ссылке http://www.nevranyo.ru/sijjisae23",
+              "type": "text",
+              "uuid": "dcf2a0cc-4901-45ed-97af-275b1d774f50"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Просмотр последних 20 запросов",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://localhost:8000/history",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "history"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

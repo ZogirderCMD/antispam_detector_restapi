@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from flask import Flask, make_response, request, abort
 import psycopg2, os, datetime, re, torch, sys
 
@@ -35,17 +35,29 @@ def get_logg(date):
 log("Starting service...")
 
 try:
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    tokenisers = {
+        'RUSpam/spamNS_v1': AutoTokenizer.from_pretrained('RUSpam/spamNS_v1'),
+        'corall88/russian_spam_detector': AutoTokenizer.from_pretrained('corall88/russian_spam_detector')
+    }
+    models = {
+        'RUSpam/spamNS_v1': AutoModelForSequenceClassification.from_pretrained('RUSpam/spamNS_v1', num_labels=1).to(device).eval(),
+        'corall88/russian_spam_detector': AutoModelForSequenceClassification.from_pretrained('corall88/russian_spam_detector')
+    }
     class SpamDetector:
         model_name = 'RUSpam/spamNS_v1'
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1).to(device).eval()
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         is_spam = False
         pred:float=0.0
 
-        def __init__(self, text):
+        def __init__(self, text, modell='RUSpam/spamNS_v1'):
+            self.model_name = modell
+            self.tokenizer = tokenisers[self.model_name]
+            self.mode = models[self.model_name]
+            match (self.model_name):
+                case 'corall88/russian_spam_detector':
+                    self.detector = pipeline("text-classification", model=self.model_name, tokenizer=self.tokenizer)
+
             self.classify_message(text)
 
         def clean_text(self, text):
@@ -55,16 +67,22 @@ try:
             return text
 
         def classify_message(self, message):
-            message = self.clean_text(message)
-            encoding = self.tokenizer(message, padding='max_length', truncation=True, max_length=128, return_tensors='pt')
-            input_ids = encoding['input_ids'].to(self.device)
-            attention_mask = encoding['attention_mask'].to(self.device)
+            match (self.model_name):
+                case 'RUSpam/spamNS_v1':
+                    message = self.clean_text(message)
+                    encoding = self.tokenizer(message, padding='max_length', truncation=True, max_length=128, return_tensors='pt')
+                    input_ids = encoding['input_ids'].to(self.device)
+                    attention_mask = encoding['attention_mask'].to(self.device)
 
-            with torch.no_grad():
-                outputs = self.model(input_ids, attention_mask=attention_mask).logits
-                self.pred = torch.sigmoid(outputs).cpu().numpy()[0][0]
+                    with torch.no_grad():
+                        outputs = self.model(input_ids, attention_mask=attention_mask).logits
+                        self.pred = torch.sigmoid(outputs).cpu().numpy()[0][0]
 
-            self.is_spam = self.pred >= 0.5
+                    self.is_spam = self.pred >= 0.5
+                case 'corall88/russian_spam_detector':
+                    result = self.detector(message)
+                    self.pred = result[0].get("score")
+                    self.is_spam = True if result[0].get("label") == "LABEL_1" else False
 except:
     log("Failed to load antispam agent")
     sys.exit()
@@ -75,16 +93,16 @@ class HistoryRequest:
     model_name:str=""
     pred:float=0.0
     
-    def req(self, text=None):
+    def req(self, text=None, model='RUSpam/spamNS_v1'):
         if not text is None: 
             self.text = text
             try:
-                sd = SpamDetector(text)
+                sd = SpamDetector(text, model)
                 self.spam = sd.is_spam
                 self.model_name = sd.model_name
                 self.pred = sd.pred
                 query(f"INSERT INTO requests_history (input_text, spam, model_name, pred) VALUES ('{self.text}', {self.spam}, '{self.model_name}', {self.pred})")
-                log(f"User made request with text: \" {text} \", result: {"POSITIVE" if self.spam else "NEGATIVE"}, prdiction score: {self.pred}")
+                log(f"User made request with text: \" {text} \", result: {"POSITIVE" if self.spam else "NEGATIVE"}, prediction score: {self.pred}")
                 return make_response({"result": "POSITIVE" if self.spam else "NEGATIVE", "score": str(self.pred)}, 200)
             except Exception as e:
                 log(f"Error on model: {e}")
@@ -146,7 +164,7 @@ app = Flask(__name__)
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    return HistoryRequest().req(request.form.get('text', None))
+    return HistoryRequest().req(request.form.get('text', None), request.form.get('model', 'RUSpam/spamNS_v1'))
 
 @app.route("/history", methods=["GET"])
 def history():
