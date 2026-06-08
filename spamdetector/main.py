@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
-from flask import Flask, make_response, request, abort
+from flask import Flask, make_response, request, abort, render_template
 import psycopg2, os, datetime, re, torch, sys
 
 try: os.mkdir("logs")
@@ -132,7 +132,7 @@ def getHistory(typ=1, ids=None):
                 log(f"User made request with unknown ID: {ids}")
                 return make_response({"result": "Unknown request ID!"}, 403)
 
-
+'''
 try:
     con = psycopg2.connect(
         user=os.getenv("POSTGRES_USER"),
@@ -140,6 +140,18 @@ try:
         host=os.getenv("POSTGRES_HOST"),
         port=os.getenv("POSTGRES_PORT"),
         database=os.getenv("POSTGRES_DB")
+    )
+except:
+    log("Failed connection to database")
+    sys.exit()
+'''
+try:
+    con = psycopg2.connect(
+        user="postgres",
+        password="12345",
+        host="localhost",
+        port=5432,
+        database="database"
     )
 except:
     log("Failed connection to database")
@@ -187,6 +199,12 @@ def all_logs(adt):
 def get_log(adt, date):
     if adt != adm_token: abort(404)
     else: return get_logg(date)
+
+if int(open("interface")) == 1:
+    log("Allowing interface...")
+    @app.route("/index")
+    def index():
+        return render_template("index.html")
 
 log("Service started!")
 

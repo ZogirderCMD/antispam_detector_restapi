@@ -1,0 +1,54 @@
+<html>
+    <meta charset="UTF-8">
+    <head>
+        <title>
+            Ввод запроса
+        </title>
+    </head>
+    <body>
+        <h2>Введите текст для определения спама<br>
+        <h1><div id="response">Результат</div></h1><br>
+        <textarea cols="50" rows="40" id="input">
+            
+        </textarea><br>
+        
+        <select id="models">
+            <h1><option value="RUSpam/spamNS_v1">RUSpam/spamNS_v1</option></h1>
+            <h1><option value="corall88/russian_spam_detector">corall88/russian_spam_detector</option></h1>
+        </select>
+        <br>
+        <button><h1>Отправить</h1></button></h2>
+    </body>
+    <script>
+        async function analyseText() {
+                const formData = new FormData()
+                    
+                formData.append("text", document.getElementById("input").value);
+                formData.append("model", document.getElementById("model").value);
+
+                const response = await fetch("/analyze", {
+                        method: "POST",
+                        body: formData,
+                        credentials: "include"
+                    }
+                )
+                result = await response.json()
+                if (!response.ok) {
+                    document.getElementById("response").textContent = result.result
+                } else {
+                    var ma = dicument.getElementById("response")
+                    ma.textContent = ""
+                    var a = document.createElement("label")
+                    var b = document.createElement("label")
+                    var res
+                    if (result.result == "POSITIVE") {res = "Положительный"}
+                    else {res = "Отрицательный"}
+                    a.textContent = `Результат на спам: ${res}`
+                    b.textContent = `Точность резульатата: ${parseFloat(result.score*100)}%`
+                    ma.appendChild(a)
+                    ma.appendChild(document.createElement("br"))
+                    ma.appendChild(b)
+                }
+            }
+    </script>
+</html>
