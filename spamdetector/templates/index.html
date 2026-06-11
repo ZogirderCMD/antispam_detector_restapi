@@ -42,7 +42,7 @@
                     if (result.result == "POSITIVE") {res = "Положительный"}
                     else {res = "Отрицательный"}
                     a.textContent = `Результат на спам: ${res}`
-                    b.textContent = `Точность резульатата: ${parseFloat(result.score*100)}%`
+                    b.textContent = `Точность резульатата: ${Math.floor(parseFloat(result.score*100))}%`
                     ma.appendChild(a)
                     ma.appendChild(document.createElement("br"))
                     ma.appendChild(b)
