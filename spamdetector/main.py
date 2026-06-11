@@ -132,7 +132,6 @@ def getHistory(typ=1, ids=None):
                 log(f"User made request with unknown ID: {ids}")
                 return make_response({"result": "Unknown request ID!"}, 403)
 
-'''
 try:
     con = psycopg2.connect(
         user=os.getenv("POSTGRES_USER"),
@@ -156,6 +155,7 @@ try:
 except:
     log("Failed connection to database")
     sys.exit()
+'''
 
 cur = con.cursor()
 
