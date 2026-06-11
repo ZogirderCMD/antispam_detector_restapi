@@ -53,7 +53,7 @@ try:
         def __init__(self, text, modell='RUSpam/spamNS_v1'):
             self.model_name = modell
             self.tokenizer = tokenisers[self.model_name]
-            self.mode = models[self.model_name]
+            self.model = models[self.model_name]
             match (self.model_name):
                 case 'corall88/russian_spam_detector':
                     self.detector = pipeline("text-classification", model=self.model_name, tokenizer=self.tokenizer)
@@ -71,8 +71,8 @@ try:
                 case 'RUSpam/spamNS_v1':
                     message = self.clean_text(message)
                     encoding = self.tokenizer(message, padding='max_length', truncation=True, max_length=128, return_tensors='pt')
-                    input_ids = encoding['input_ids'].to(self.device)
-                    attention_mask = encoding['attention_mask'].to(self.device)
+                    input_ids = encoding['input_ids'].to(device)
+                    attention_mask = encoding['attention_mask'].to(device)
 
                     with torch.no_grad():
                         outputs = self.model(input_ids, attention_mask=attention_mask).logits
@@ -200,7 +200,7 @@ def get_log(adt, date):
     if adt != adm_token: abort(404)
     else: return get_logg(date)
 
-if int(open("interface")) == 1:
+if int(open("interface", "r").read()) == 1:
     log("Allowing interface...")
     @app.route("/index")
     def index():
