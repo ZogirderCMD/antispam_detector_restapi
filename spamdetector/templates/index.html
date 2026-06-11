@@ -8,23 +8,21 @@
     <body>
         <h2>Введите текст для определения спама<br>
         <h1><div id="response">Результат</div></h1><br>
-        <textarea cols="50" rows="40" id="input">
-            
-        </textarea><br>
+        <textarea cols="50" rows="40" id="input"></textarea><br>
         
         <select id="models">
             <h1><option value="RUSpam/spamNS_v1">RUSpam/spamNS_v1</option></h1>
             <h1><option value="corall88/russian_spam_detector">corall88/russian_spam_detector</option></h1>
         </select>
         <br>
-        <button><h1>Отправить</h1></button></h2>
+        <button id="check"><h1>Отправить</h1></button></h2>
     </body>
     <script>
         async function analyseText() {
                 const formData = new FormData()
                     
                 formData.append("text", document.getElementById("input").value);
-                formData.append("model", document.getElementById("model").value);
+                formData.append("model", document.getElementById("models").value);
 
                 const response = await fetch("/analyze", {
                         method: "POST",
@@ -50,5 +48,6 @@
                     ma.appendChild(b)
                 }
             }
+        document.getElementById("check").addEventListener("click", async () => {await analyseText()} )
     </script>
 </html>
