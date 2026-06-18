@@ -11,7 +11,7 @@
 | ОС | Ubuntu Server 26.04 |
 | ОЗУ | 1ГБ |
 | Место на жёстком диске | 150ГБ |
-| ЦП | Intel Pentium |
+| ЦП | Intel Pentium Gold |
 
 ## Установка небходимых модулей
 Для работы необходим podman-compose\
